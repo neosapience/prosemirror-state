@@ -163,6 +163,9 @@ export class Transaction extends Transform {
         let $from = this.doc.resolve(from)
         marks = to == from ? $from.marks() : $from.marksAcross(this.doc.resolve(to))
       }
+      if(!marks.length && schema.marks.query) {
+        marks = schema.marks.query.create({id:(Math.random() + 1).toString(36).substr(2, 5)})
+      }
       this.replaceRangeWith(from, to, schema.text(text, marks))
       if (!this.selection.empty) this.setSelection(Selection.near(this.selection.$to))
       return this

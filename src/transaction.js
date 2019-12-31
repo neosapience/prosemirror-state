@@ -1,6 +1,7 @@
 import {Transform} from "prosemirror-transform"
 import {Mark} from "prosemirror-model"
 import {Selection} from "./selection"
+import nanoid from 'nanoid'
 
 const UPDATED_SEL = 1, UPDATED_MARKS = 2, UPDATED_SCROLL = 4
 
@@ -164,7 +165,7 @@ export class Transaction extends Transform {
         marks = to == from ? $from.marks() : $from.marksAcross(this.doc.resolve(to))
       }
       if(!marks.length && schema.marks.query) {
-        marks = schema.marks.query.create({id:(Math.random() + 1).toString(36).substr(2, 5)})
+        marks = schema.marks.query.create({id: nanoid(10)})
       }
       this.replaceRangeWith(from, to, schema.text(text, marks))
       if (!this.selection.empty) this.setSelection(Selection.near(this.selection.$to))

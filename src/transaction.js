@@ -156,13 +156,16 @@ export class Transaction extends Transform {
     let schema = this.doc.type.schema
     if (from == null) {
       if (!text) return this.deleteSelection()
-      return this.replaceSelectionWith(schema.text(text), true)
+      return this.replaceSelectionWith(schema.text(text, schema.marks.query.create({id: nanoid()})), false)
     } else {
       if (!text) return this.deleteRange(from, to)
       let marks = this.storedMarks
       if (!marks) {
         let $from = this.doc.resolve(from)
         marks = to == from ? $from.marks() : $from.marksAcross(this.doc.resolve(to))
+        if (!marks.length && $from.nodeBefore && $from.nodeAfter && $from.nodeBefore.type.name === 'separator') {
+          marks = $from.nodeAfter.marks
+        }
       }
       if(!marks.length && schema.marks.query) {
         marks = schema.marks.query.create({id: nanoid()})

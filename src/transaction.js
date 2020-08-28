@@ -154,9 +154,18 @@ export class Transaction extends Transform {
   // with a text node containing the given string.
   insertText(text, from, to = from) {
     let schema = this.doc.type.schema
+    let savedQueryAttr = localStorage.getItem('DEFAULT_QUERY_ATTR')
+    if (savedQueryAttr) {
+      savedQueryAttr = JSON.parse(savedQueryAttr)
+    } else {
+      savedQueryAttr = {}
+    }
+    const silence = savedQueryAttr.silence || 300
+    const speed = savedQueryAttr.speed || 1
+    
     if (from == null) {
       if (!text) return this.deleteSelection()
-      return this.replaceSelectionWith(schema.text(text, schema.marks.query.create({id: nanoid()})), false)
+      return this.replaceSelectionWith(schema.text(text, schema.marks.query.create({id: nanoid(), silence, speed})), false)
     } else {
       if (!text) return this.deleteRange(from, to)
       let marks = this.storedMarks
@@ -168,7 +177,7 @@ export class Transaction extends Transform {
         }
       }
       if(!marks.length && schema.marks.query) {
-        marks = schema.marks.query.create({id: nanoid()})
+        marks = schema.marks.query.create({id: nanoid(), silence, speed})
       }
       this.replaceRangeWith(from, to, schema.text(text, marks))
       if (!this.selection.empty) this.setSelection(Selection.near(this.selection.$to))

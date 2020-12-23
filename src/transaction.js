@@ -160,9 +160,22 @@ export class Transaction extends Transform {
     } else {
       savedQueryAttr = {}
     }
-    const silence = savedQueryAttr.silence || 300
-    const speed = savedQueryAttr.speed || 1
-    
+    let savedQuerySilence
+    let savedQuerySpeed
+    if (from) {
+      let _$from = this.doc.resolve(from)
+      if (_$from && _$from.parent) {
+        const parent = _$from.parent.type.name === 'paragraph' ? _$from.parent : null
+        const paragraphActorId = parent ? parent.attrs.actor : null
+        if (savedQueryAttr.hasOwnProperty(paragraphActorId)) {
+          savedQuerySilence = savedQueryAttr[paragraphActorId].silence
+          savedQuerySpeed = savedQueryAttr[paragraphActorId].speed
+        }
+      }
+    }
+    const silence = savedQuerySilence || 300
+    const speed = savedQuerySpeed || 1
+
     if (from == null) {
       if (!text) return this.deleteSelection()
       return this.replaceSelectionWith(schema.text(text, schema.marks.query.create({id: nanoid(), silence, speed})), false)
